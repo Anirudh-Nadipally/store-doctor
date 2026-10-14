@@ -1,0 +1,7 @@
+{
+  "rules_version": "1.1.0",
+  "auc_all": 0.917,
+  "auc_stores_with_items": 0.874,
+  "mean_score_sellers": 79.2,
+  "mean_score_zero": 36.5
+}

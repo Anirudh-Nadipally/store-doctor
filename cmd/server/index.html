@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store Doctor · diagnose a Sticker Mule store</title>
+<style>
+  :root { --ink:#16181d; --muted:#6b7280; --line:#e6e7eb; --bg:#fafaf9; --ok:#0f9d58; --warn:#d97706; --bad:#dc2626; --accent:#ff5a1f; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width: 760px; margin: 0 auto; padding: 56px 20px 80px; }
+  h1 { font-size: 30px; letter-spacing:-.02em; margin:0 0 6px; }
+  .sub { color:var(--muted); margin:0 0 28px; }
+  form { display:flex; gap:10px; }
+  input { flex:1; padding:13px 14px; border:1px solid var(--line); border-radius:10px; font-size:16px; background:#fff; }
+  input:focus { outline:2px solid var(--accent); outline-offset:-1px; }
+  button { padding:0 20px; border:0; border-radius:10px; background:var(--ink); color:#fff; font-weight:600; font-size:15px; cursor:pointer; }
+  button:disabled { opacity:.5; }
+  .try { margin-top:10px; font-size:13px; color:var(--muted); }
+  .try a { color:var(--ink); margin-right:10px; cursor:pointer; text-decoration:underline; text-decoration-color:var(--line); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px; margin-top:22px; }
+  .head { display:flex; align-items:center; gap:20px; }
+  .score { width:92px; height:92px; border-radius:50%; display:grid; place-items:center; font-size:30px; font-weight:700; flex:none; }
+  .score small { display:block; font-size:11px; font-weight:600; color:var(--muted); text-align:center; margin-top:-6px; }
+  .name { font-size:20px; font-weight:700; }
+  .meta { color:var(--muted); font-size:13px; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:700; margin-top:6px; }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 12px; }
+  ol { margin:0; padding-left:20px; } ol li { margin:6px 0; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  td { padding:9px 6px; border-top:1px solid var(--line); vertical-align:top; }
+  td.id { font-family: ui-monospace, Menlo, monospace; color:var(--muted); width:62px; }
+  td.pts { text-align:right; white-space:nowrap; font-variant-numeric: tabular-nums; width:60px; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:8px; }
+  .detail { color:var(--muted); font-size:13px; }
+  .advice { white-space:pre-wrap; }
+  .note { font-size:12px; color:var(--muted); margin-top:10px; }
+  .err { color:var(--bad); margin-top:16px; }
+  footer { margin-top:40px; font-size:12px; color:var(--muted); }
+  footer a { color:inherit; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Store Doctor</h1>
+  <p class="sub">Most Sticker Mule stores never make a sale. Paste a store and get the fixes that matter, scored by rules you can read.</p>
+  <form id="f">
+    <input id="q" placeholder="@handle or stickermule.com/handle" autocomplete="off" aria-label="Store handle">
+    <button id="go">Diagnose</button>
+  </form>
+  <div class="try">Try: <a data-h="unixstickers">@unixstickers</a><a data-h="beddbug">@beddbug</a><a data-h="musictime">@musictime</a></div>
+  <div id="out"></div>
+  <footer>Reads only public store pages. Scores come from versioned rules (<a href="/api/rules">see them</a>); an optional LLM only words the advice. Not affiliated with Sticker Mule.</footer>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const color = s => s >= 85 ? '#0f9d58' : s >= 60 ? '#d97706' : '#dc2626';
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function run(h) {
+  $('#q').value = h; $('#go').disabled = true; $('#out').innerHTML = '<p class="note">Reading the store page…</p>';
+  try {
+    const r = await fetch('/api/diagnose?store=' + encodeURIComponent(h));
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Something went wrong');
+    render(d);
+  } catch (e) { $('#out').innerHTML = `<p class="err">${esc(e.message)}</p>`; }
+  finally { $('#go').disabled = false; }
+}
+function render(d) {
+  const s = d.snapshot, c = color(d.score);
+  const joined = s.joinDate && !s.joinDate.startsWith('0001') ? 'joined ' + new Date(s.joinDate).getFullYear() + ' · ' : '';
+  const items = s.itemCount >= 20 ? '20+ items' : s.itemCount + ' items';
+  const fixes = d.topFixes?.length ? `<div class="card"><h2>Fix these first</h2><ol>${d.topFixes.map(f => `<li>${esc(f)}</li>`).join('')}</ol></div>`
+                                   : `<div class="card"><h2>Fix these first</h2><p>Nothing basic is missing. This store's fundamentals are in place.</p></div>`;
+  const advice = d.advice ? `<div class="card"><h2>Tailored advice</h2><div class="advice">${esc(d.advice)}</div><p class="note">Written by an LLM from the failed checks. It does not affect the score.</p></div>` : '';
+  const rows = d.results.map(x => `<tr><td class="id">${x.id}</td><td><span class="dot" style="background:${x.passed ? 'var(--ok)' : 'var(--bad)'}"></span>${esc(x.name)}<div class="detail">${esc(x.detail)}</div></td><td class="pts">${x.points}/${x.max}</td></tr>`).join('');
+  $('#out').innerHTML = `
+    <div class="card"><div class="head">
+      <div class="score" style="border:6px solid ${c}"><div>${d.score}<small>of 100</small></div></div>
+      <div><div class="name">${esc(s.name || '@' + s.handle)}</div>
+        <div class="meta">@${esc(s.handle)} · ${joined}${items} · ${s.orders.toLocaleString()} orders</div>
+        <span class="pill" style="background:${c}1a;color:${c}">${esc(d.grade)}</span></div>
+    </div></div>
+    ${fixes}${advice}
+    <div class="card"><h2>Every check · rules v${esc(d.rulesVersion)}</h2><table>${rows}</table></div>`;
+}
+$('#f').onsubmit = e => { e.preventDefault(); if ($('#q').value.trim()) run($('#q').value.trim()); };
+document.querySelectorAll('.try a').forEach(a => a.onclick = () => run(a.dataset.h));
+</script>
+</body>
+</html>

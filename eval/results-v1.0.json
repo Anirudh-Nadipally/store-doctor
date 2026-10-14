@@ -1,0 +1,96 @@
+{
+  "auc_all": 0.918,
+  "auc_stores_with_items": 0.874,
+  "mean_score_sellers": 82.3,
+  "mean_score_zero": 45.5,
+  "n_per_group": 60,
+  "n_sellers": 60,
+  "n_sellers_with_items": 59,
+  "n_zero": 60,
+  "n_zero_with_items": 35,
+  "rules": [
+    {
+      "id": "SD-01",
+      "name": "Custom store handle",
+      "pass_rate_sellers": 86.7,
+      "pass_rate_zero": 60,
+      "gap_pp": 26.7,
+      "verdict": "keep: strong signal"
+    },
+    {
+      "id": "SD-02",
+      "name": "Profile picture",
+      "pass_rate_sellers": 90,
+      "pass_rate_zero": 66.7,
+      "gap_pp": 23.3,
+      "verdict": "keep: strong signal"
+    },
+    {
+      "id": "SD-03",
+      "name": "Banner image",
+      "pass_rate_sellers": 66.7,
+      "pass_rate_zero": 16.7,
+      "gap_pp": 50,
+      "verdict": "keep: strong signal"
+    },
+    {
+      "id": "SD-04",
+      "name": "Store bio",
+      "pass_rate_sellers": 38.3,
+      "pass_rate_zero": 13.3,
+      "gap_pp": 25,
+      "verdict": "keep: strong signal"
+    },
+    {
+      "id": "SD-05",
+      "name": "Display name",
+      "pass_rate_sellers": 100,
+      "pass_rate_zero": 100,
+      "gap_pp": 0,
+      "verdict": "remove or rethink: does not separate sellers"
+    },
+    {
+      "id": "SD-06",
+      "name": "Has products",
+      "pass_rate_sellers": 98.3,
+      "pass_rate_zero": 58.3,
+      "gap_pp": 40,
+      "verdict": "keep: strong signal"
+    },
+    {
+      "id": "SD-07",
+      "name": "Catalog depth (5+ items)",
+      "pass_rate_sellers": 83.3,
+      "pass_rate_zero": 11.7,
+      "gap_pp": 71.6,
+      "verdict": "keep: strong signal"
+    },
+    {
+      "id": "SD-08",
+      "name": "Product variety (2+ kinds)",
+      "pass_rate_sellers": 85,
+      "pass_rate_zero": 26.7,
+      "gap_pp": 58.3,
+      "verdict": "keep: strong signal"
+    },
+    {
+      "id": "SD-09",
+      "name": "Identity verified",
+      "pass_rate_sellers": 73.3,
+      "pass_rate_zero": 21.7,
+      "gap_pp": 51.6,
+      "verdict": "keep: strong signal"
+    },
+    {
+      "id": "SD-10",
+      "name": "Store is public",
+      "pass_rate_sellers": 100,
+      "pass_rate_zero": 100,
+      "gap_pp": 0,
+      "verdict": "remove or rethink: does not separate sellers"
+    }
+  ],
+  "run_at": "2026-10-14T18:11:53Z",
+  "seed": 7,
+  "zero_sale_empty_share": 41.7
+}
